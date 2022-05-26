@@ -7,7 +7,9 @@ app.get('/', (req, res) => {
 app.get('/test', function (req, res) {
   res.json({ message: 'hello, test' })
 });
-app.get('/AllStaff', function(req, res) {
+
+// pool connection
+app.get('/AllStaff', function (req, res) {
   const pool = new Pool({
     user: 'postgres',
     host: 'localhost',
@@ -17,25 +19,35 @@ app.get('/AllStaff', function(req, res) {
   })
   pool.query('SELECT name FROM staff', (error, result) => {
     console.log(result)
-    res.json({message : result.rows})
-    pool.end()
+    res.json({ message: result.rows })
+    // end when you want
+    //pool.end()
   })
-
-  // client connection
-  // const client = new Client({
-  //   user: 'postgres',
-  //   host: 'localhost',
-  //   database: 'postgres',
-  //   password: 'root',
-  //   port: 5432,
-  // })
-  // client.connect()
-  // client.query('SELECT name FROM staff', (err, res) => {
-  //   console.log(err, res)
-  //   client.end()
-  // })
-
 });
+
+// client connection
+var client = new Client({
+  user: 'postgres',
+  host: 'localhost',
+  database: 'postgres',
+  password: 'root',
+  port: 5432,
+})
+
+client.connect();
+
+var query = 'SELECT name FROM staff'
+
+app.get('/AllStaffFromClient', (req, res) => {
+
+  client.query(query, (error, result) => {
+    console.log(result);
+    res.json({ message: result.rows })
+    // end when you want
+    //client.end();
+  });
+});
+
 module.exports = {
   path: '/api',
   handler: app
